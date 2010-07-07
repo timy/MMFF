@@ -6,9 +6,13 @@ DYNAMIC_DEP 	= $(OUTPUT)
 SRC_LIBRARY 	= \
 	write_log.f90 \
 	dummy.f90 \
+	mmff_util.f90 \
+	mmff_data.f90 \
 	mmff_base_dbl.f90 \
+	mmff_base_dcp.f90 \
 	mmff_workload.f90 \
-	mmff_core.f90 \
+	mmff_core_dbl.f90 \
+	mmff_core_dcp.f90 \
 	mmff_toolkit.f90 \
 	mmff_main.f90
 SRC_CONSOLE	= \

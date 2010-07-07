@@ -12,6 +12,20 @@ end subroutine mmff_reset
 
 
 
+
+subroutine mmff_send_data( h_queu )
+    integer, intent(in):: h_queu;
+end subroutine mmff_send_data
+
+
+
+subroutine mmff_recv_data( h_queu )
+    integer, intent(in):: h_queu;
+end subroutine mmff_recv_data
+
+
+
+
 subroutine mmff_create_data_dbl( a, f, str, h_arry )
     double precision, pointer:: a(:)
     external:: f;
@@ -28,12 +42,17 @@ end subroutine mmff_delete_data_dbl
 
 
 
-subroutine mmff_send_data( h_queu )
-    integer, intent(in):: h_queu;
-end subroutine mmff_send_data
+
+subroutine mmff_create_data_dcp( a, f, str, h_arry )
+    double complex, pointer:: a(:)
+    external:: f;
+    character(len=*):: str;
+    integer, intent(in):: h_arry;
+end subroutine mmff_create_data_dcp
 
 
 
-subroutine mmff_recv_data( h_queu )
-    integer, intent(in):: h_queu;
-end subroutine mmff_recv_data
+subroutine mmff_delete_data_dcp( a, h_arry )
+    double complex, pointer:: a(:)
+    integer, intent(in):: h_arry
+end subroutine mmff_delete_data_dcp

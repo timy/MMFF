@@ -1,21 +1,10 @@
-subroutine send_data_dcp_to_each_proc( tag )
+
+subroutine manage_and_send_data_int( tag )
     integer:: tag;
     return;
-end subroutine send_data_dcp_to_each_proc
+end subroutine manage_and_send_data_int
 
 
 
-subroutine send_data_int_to_each_proc( tag )
-    integer:: tag;
-    return;
-end subroutine send_data_int_to_each_proc
-
-
-
-subroutine recv_data_dcp_from_each_proc( tag )
-end subroutine recv_data_dcp_from_each_proc
-
-
-
-subroutine recv_data_int_from_each_proc( tag )
-end subroutine recv_data_int_from_each_proc
+subroutine manage_and_recv_data_int( tag )
+end subroutine manage_and_recv_data_int

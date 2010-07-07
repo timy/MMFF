@@ -77,6 +77,92 @@ end subroutine mmff_reset
 
 
 
+
+
+subroutine mmff_send_data( h_queu )
+    
+    use mod_mmff_core_para, only: arry_info, queu_info, queu_count, arry_count, &
+          MPI_DOUBLE_PRECISION, MPI_DOUBLE_COMPLEX, MPI_INTEGER;
+
+    implicit none;
+    integer, intent(in):: h_queu
+    integer:: i, i_arry_start, i_arry_end
+
+    if( queu_info(h_queu) % i_arry == 0) return; ! no data array in the queue
+    
+    i_arry_start = queu_info(h_queu) % i_arry;
+    if( h_queu == queu_count ) then
+        i_arry_end = arry_count;
+    else
+        i_arry_end = queu_info(h_queu+1) % i_arry - 1;
+    end if
+
+    ! loop all the data arrays in a specified queue
+    do i = i_arry_start, i_arry_end
+
+        select case( arry_info(i) % type )
+        case( MPI_DOUBLE_PRECISION )
+            call manage_and_send_data_dbl( i );
+        case( MPI_DOUBLE_COMPLEX )
+            call manage_and_send_data_dcp( i );
+        case( MPI_INTEGER )
+            call manage_and_send_data_int( i );
+        case default
+        end select
+
+    end do
+
+    return;
+
+end subroutine mmff_send_data
+
+
+
+
+
+subroutine mmff_recv_data( h_queu )
+
+    use mod_mmff_core_para, only: arry_info, queu_info, queu_count, arry_count, &
+          MPI_DOUBLE_PRECISION, MPI_DOUBLE_COMPLEX, MPI_INTEGER;
+
+    implicit none;
+    integer, intent(in):: h_queu
+    integer:: i, i_arry_start, i_arry_end
+
+    if( queu_info(h_queu) % i_arry == 0) return; ! no data array in the queue
+    
+    i_arry_start = queu_info(h_queu) % i_arry;
+    if( h_queu == queu_count ) then
+        i_arry_end = arry_count;
+    else
+        i_arry_end = queu_info(h_queu+1) % i_arry - 1;
+    end if
+
+
+    do i = i_arry_start, i_arry_end
+
+        select case( arry_info(i) % type )
+        case( MPI_DOUBLE_PRECISION )
+            call manage_and_recv_data_dbl( i );
+        case( MPI_DOUBLE_COMPLEX )
+            call manage_and_recv_data_dcp( i );
+        case( MPI_INTEGER )
+            call manage_and_recv_data_int( i );
+        case default
+        end select
+
+    end do
+
+    return;
+
+end subroutine mmff_recv_data
+
+
+
+
+
+
+
 subroutine mmff_create_data_dbl( a, f, str_a, h_arry )
     use mod_mmff_core_para, only: queu_count, arry_count, arry_info, queu_info, MPI_DOUBLE_PRECISION
 
@@ -140,80 +226,62 @@ end subroutine mmff_delete_data_dbl
 
 
 
-subroutine mmff_send_data( h_queu )
-    
-    use mod_mmff_core_para, only: arry_info, queu_info, queu_count, arry_count, &
-          MPI_DOUBLE_PRECISION, MPI_DOUBLE_COMPLEX, MPI_INTEGER;
+
+
+subroutine mmff_create_data_dcp( a, f, str_a, h_arry )
+    use mod_mmff_core_para, only: queu_count, arry_count, arry_info, queu_info, MPI_DOUBLE_COMPLEX
 
     implicit none;
-    integer, intent(in):: h_queu
-    integer:: i, i_arry_start, i_arry_end
+    double complex, pointer:: a(:);
+    external:: f;
+    integer:: i, h_arry;
+    character(len=*):: str_a;
 
-    if( queu_info(h_queu) % i_arry == 0) return; ! no data array in the queue
-    
-    i_arry_start = queu_info(h_queu) % i_arry;
-    if( h_queu == queu_count ) then
-        i_arry_end = arry_count;
-    else
-        i_arry_end = queu_info(h_queu+1) % i_arry - 1;
-    end if
 
-    ! loop all the data arrays in a specified queue
-    do i = i_arry_start, i_arry_end
+    arry_count = arry_count + 1;
+    arry_info(arry_count) % id = arry_count;
+    arry_info(arry_count) % type = MPI_DOUBLE_COMPLEX;
+    arry_info(arry_count) % queu = queu_count;
+    arry_info(arry_count) % name = str_a;
 
-        select case( arry_info(i) % type )
-        case( MPI_DOUBLE_PRECISION )
-            call manage_and_send_data_dbl( i );
-        case( MPI_DOUBLE_COMPLEX )
-            call send_data_dcp_to_each_proc( i );
-        case( MPI_INTEGER )
-            call send_data_int_to_each_proc( i );
-        case default
-        end select
+    allocate( a( queu_info(queu_count) % n_data ) );
 
+    do i = 1, queu_info(queu_count) % n_data
+        call f( i, a(i) );
     end do
+
+    if( associated(arry_info(arry_count) % arry_dcp % ptr) ) then
+        nullify( arry_info(arry_count) % arry_dcp % ptr ); 
+    end if
+    arry_info(arry_count) % arry_dcp % ptr => a;
+
+    arry_info(arry_count) % b_stat = 1;
+    queu_info(queu_count) % b_arry = 1;
+
+    h_arry = arry_info(arry_count) % id;
+
+    return;
+end subroutine mmff_create_data_dcp
+
+
+
+
+subroutine mmff_delete_data_dcp( a, h_arry )
+    use mod_mmff_core_para, only: arry_info
+
+    implicit none;
+    integer, intent(in):: h_arry;
+    double complex, pointer:: a(:);
+
+    ! deattach the pointer
+    if( associated( arry_info(h_arry) % arry_dcp % ptr ) ) then
+        nullify( arry_info(h_arry) % arry_dcp % ptr ); 
+    end if
+    ! free the heap
+    deallocate( a );
+    ! toggle the status
+    arry_info(h_arry) % b_stat = 0;
 
     return;
 
-end subroutine mmff_send_data
-
-
-
-
-
-subroutine mmff_recv_data( h_queu )
-
-    use mod_mmff_core_para, only: arry_info, queu_info, queu_count, arry_count, &
-          MPI_DOUBLE_PRECISION, MPI_DOUBLE_COMPLEX, MPI_INTEGER;
-
-    implicit none;
-    integer, intent(in):: h_queu
-    integer:: i, i_arry_start, i_arry_end
-
-    if( queu_info(h_queu) % i_arry == 0) return; ! no data array in the queue
-    
-    i_arry_start = queu_info(h_queu) % i_arry;
-    if( h_queu == queu_count ) then
-        i_arry_end = arry_count;
-    else
-        i_arry_end = queu_info(h_queu+1) % i_arry - 1;
-    end if
-
-
-    do i = i_arry_start, i_arry_end
-
-        select case( arry_info(i) % type )
-        case( MPI_DOUBLE_PRECISION )
-            call manage_and_recv_data_dbl( i );
-        case( MPI_DOUBLE_COMPLEX )
-            call recv_data_dcp_from_each_proc( i );
-        case( MPI_INTEGER )
-            call recv_data_int_from_each_proc( i );
-        case default
-        end select
-
-    end do
-
-    return;
-
-end subroutine mmff_recv_data
+end subroutine mmff_delete_data_dcp
