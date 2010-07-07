@@ -5,19 +5,20 @@ DYNAMIC_DEP 	= $(OUTPUT)
 
 SRC_LIBRARY 	= \
 	write_log.f90 \
-	dummy.f90 \
 	mmff_util.f90 \
 	mmff_data.f90 \
 	mmff_base_dbl.f90 \
 	mmff_base_dcp.f90 \
+	mmff_base_int.f90 \
 	mmff_workload.f90 \
 	mmff_core_dbl.f90 \
 	mmff_core_dcp.f90 \
+	mmff_core_int.f90 \
 	mmff_toolkit.f90 \
 	mmff_main.f90
 SRC_CONSOLE	= \
-	console_master.f90 \
-	console_slave.f90
+	console_master_int.f90 \
+	console_slave_int.f90
 FORTRAN_FLAGS 	=  -fPIC -I./src
 FC		= /usr/local/Packages/mvapich2-tcp-intel-1.2rc2/bin/mpif90
 

@@ -56,3 +56,19 @@ subroutine mmff_delete_data_dcp( a, h_arry )
     double complex, pointer:: a(:)
     integer, intent(in):: h_arry
 end subroutine mmff_delete_data_dcp
+
+
+
+subroutine mmff_create_data_int( a, f, str, h_arry )
+    integer, pointer:: a(:)
+    external:: f;
+    character(len=*):: str;
+    integer, intent(in):: h_arry;
+end subroutine mmff_create_data_int
+
+
+
+subroutine mmff_delete_data_int( a, h_arry )
+    integer, pointer:: a(:)
+    integer, intent(in):: h_arry
+end subroutine mmff_delete_data_int

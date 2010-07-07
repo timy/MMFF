@@ -285,3 +285,69 @@ subroutine mmff_delete_data_dcp( a, h_arry )
     return;
 
 end subroutine mmff_delete_data_dcp
+
+
+
+
+
+
+
+
+
+subroutine mmff_create_data_int( a, f, str_a, h_arry )
+    use mod_mmff_core_para, only: queu_count, arry_count, arry_info, queu_info, MPI_INTEGER
+
+    implicit none;
+    integer, pointer:: a(:);
+    external:: f;
+    integer:: i, h_arry;
+    character(len=*):: str_a;
+
+
+    arry_count = arry_count + 1;
+    arry_info(arry_count) % id = arry_count;
+    arry_info(arry_count) % type = MPI_INTEGER;
+    arry_info(arry_count) % queu = queu_count;
+    arry_info(arry_count) % name = str_a;
+
+    allocate( a( queu_info(queu_count) % n_data ) );
+
+    do i = 1, queu_info(queu_count) % n_data
+        call f( i, a(i) );
+    end do
+
+    if( associated(arry_info(arry_count) % arry_int % ptr) ) then
+        nullify( arry_info(arry_count) % arry_int % ptr ); 
+    end if
+    arry_info(arry_count) % arry_int % ptr => a;
+
+    arry_info(arry_count) % b_stat = 1;
+    queu_info(queu_count) % b_arry = 1;
+
+    h_arry = arry_info(arry_count) % id;
+
+    return;
+end subroutine mmff_create_data_int
+
+
+
+
+subroutine mmff_delete_data_int( a, h_arry )
+    use mod_mmff_core_para, only: arry_info
+
+    implicit none;
+    integer, intent(in):: h_arry;
+    integer, pointer:: a(:);
+
+    ! deattach the pointer
+    if( associated( arry_info(h_arry) % arry_int % ptr ) ) then
+        nullify( arry_info(h_arry) % arry_int % ptr ); 
+    end if
+    ! free the heap
+    deallocate( a );
+    ! toggle the status
+    arry_info(h_arry) % b_stat = 0;
+
+    return;
+
+end subroutine mmff_delete_data_int
