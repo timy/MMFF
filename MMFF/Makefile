@@ -1,10 +1,19 @@
-SUBDIRS = src
+include ./Makefile.cfg
 
-all build cleanall: $(SUBDIRS)
+SUBDIRS = src $(MAIN_DIR)
+
+all: $(SUBDIRS)
 	for subdir in $(SUBDIRS); do (cd $${subdir}; $(MAKE) $@); done 
 
 run:
 	qsub run.sh  -q opt.q
 
 clean:
-	rm app *.so *~ MPI_test.* LOG
+	cd $(MAIN_DIR) && $(MAKE) $@
+	$(RM) *~ 
+	$(RM) MPI_test.* 
+	$(RM) LOG
+	$(RM) *.dat
+
+cleanall: clean src
+	cd $(SUBDIRS) && $(MAKE) $@

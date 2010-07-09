@@ -1,7 +1,8 @@
+include ../Makefile.cfg
+
 MODULE_NAME	= libmmff
 OUTPUT		= ../$(MODULE_NAME).so
 OUTPUT_STATIC	= $(MODULE_NAME).a
-DYNAMIC_DEP 	= $(OUTPUT)
 
 SRC_LIBRARY 	= \
 	write_log.f90 \
@@ -16,15 +17,9 @@ SRC_LIBRARY 	= \
 	mmff_core_int.f90 \
 	mmff_toolkit.f90 \
 	mmff_main.f90
-SRC_CONSOLE	= \
-	console_master_int.f90 \
-	console_slave_int.f90
-FORTRAN_FLAGS 	=  -fPIC -I./src
-FC		= /usr/local/Packages/mvapich2-tcp-intel-1.2rc2/bin/mpif90
 
-LD_FLAGS       	= 
-LIBS		=
-
+FORTRAN_FLAGS 	:= $(FORTRAN_FLAGS) -fPIC -I./src
+LD_FLAGS	:= $(LD_FLAGS) -fPIC
 
 %.o : %.f90
 	$(FC) $(FORTRAN_FLAGS) $< -c -o $*.o 
@@ -34,25 +29,20 @@ LIBS		=
 
 
 OBJ_LIBRARY	= $(SRC_LIBRARY:.f90=.o)
-OBJ_CONSOLE	= $(SRC_CONSOLE:.f90=.o)
-LD	  	= ld $(LD_FLAGS) -shared -fPIC
+#OBJ_CONSOLE	= $(SRC_CONSOLE:.f90=.o)
 
 
+# direct generation of executable instead of a library
+# test: $(OBJ_LIBRARY) $(OBJ_CONSOLE)
+#	$(FC) $(OBJ_LIBRARY) $(OBJ_CONSOLE) -o ../test
 
-all: $(OBJ_LIBRARY) $(OBJ_CONSOLE)
-	$(FC) $(OBJ_LIBRARY) $(OBJ_CONSOLE) -o ../app
-
-
-
-build: $(DYNAMIC_DEP)
-
-
-
+all: lib
+lib: $(OUTPUT)
 
 $(OUTPUT): $(OBJ_LIBRARY) 
-	$(LD) $(LD_SHARED) -o $(OUTPUT) $(OBJ_LIBRARY) $(LIBS) $(LDFLAGS)
+	$(LD) $(OBJ_LIBRARY) $(LD_FLAGS) $(LD_SHARED) $(LIB_DIR) $(LIBS) -o $(OUTPUT) 
 cleanall:
-	rm *.o *~ *.mod *.so app
-
-run:
-	./app
+	$(RM) *.o 
+	$(RM) *~ 
+	$(RM) *.mod 
+	$(RM) $(OUTPUT)

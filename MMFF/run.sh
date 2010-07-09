@@ -15,4 +15,4 @@
 echo "Got $NSLOTS slots."
 PATH=$PATH:$MPI_HOME/bin
 export MPD_CON_EXT=$JOB_ID
-mpiexec -machinefile $TMPDIR/machines  -n $NSLOTS $PWD/app
+mpiexec -machinefile $TMPDIR/machines  -n $NSLOTS $PWD/test
