@@ -27,20 +27,14 @@ LD_FLAGS	:= $(LD_FLAGS) -fPIC
 %.o : %.f
 	$(FC) $(FORTRAN_FLAGS) $< -c -o $*.o 
 
-
 OBJ_LIBRARY	= $(SRC_LIBRARY:.f90=.o)
-#OBJ_CONSOLE	= $(SRC_CONSOLE:.f90=.o)
-
-
-# direct generation of executable instead of a library
-# test: $(OBJ_LIBRARY) $(OBJ_CONSOLE)
-#	$(FC) $(OBJ_LIBRARY) $(OBJ_CONSOLE) -o ../test
 
 all: lib
 lib: $(OUTPUT)
 
 $(OUTPUT): $(OBJ_LIBRARY) 
-	$(LD) $(OBJ_LIBRARY) $(LD_FLAGS) $(LD_SHARED) $(LIB_DIR) $(LIBS) -o $(OUTPUT) 
+	$(LD) $(OBJ_LIBRARY) $(LD_FLAGS) $(LD_SHARED) $(LIB_DIR) $(LIBS) -o $@ 
+
 cleanall:
 	$(RM) *.o 
 	$(RM) *~ 

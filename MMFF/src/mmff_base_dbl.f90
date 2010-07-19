@@ -16,14 +16,17 @@ subroutine send_data_mpi_dbl( i_proc, n_elem, send_data, tag, b_verbose )
     if( b_verbose ) then
         if ( mpi_ierr == MPI_SUCCESS ) then
 
-            write( text, '(a, i8, a, i8)' ), 'data ', tag, ' is sent to node ', i_proc; 
+            write( text, '(3(a,i6))' ), 'double precision data', tag, &
+                  ' -> node', i_proc, ' : size =', n_elem; 
             call write_log( text );
 
         else 
+
             write( text, '(a, i8, a, i8, a, i8)'), &
                   'error from data ', tag, ' in process ', i_proc, &
                   ': ', mpi_ierr;
             call write_log( text );
+
         end if
     end if
 
@@ -51,14 +54,17 @@ subroutine recv_data_mpi_dbl( i_proc, n_elem, recv_data, tag, b_verbose )
     if( b_verbose ) then
         if ( mpi_ierr == MPI_SUCCESS ) then
 
-            write( text, '(a, i8, a, i8)' ), 'data ', tag, &
-                  ' is received from node ', i_proc; 
+            write( text, '(3(a,i6))' ), 'double precision data', tag, &
+                  ' -> node', i_proc, ' : size =', n_elem; 
             call write_log( text );
+
         else
+
             write( text, '(a, i8, a, i8, a, i8)'), &
                   'error from data ', tag, ' in process ', i_proc, &
                   ': ', mpi_ierr;
             call write_log( text );
+
         end if
     end if
     return;

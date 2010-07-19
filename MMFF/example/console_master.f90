@@ -4,8 +4,9 @@ subroutine console_master( mpi_info )
 
     implicit none;
     type(T_mmff_mpi_info), intent(in):: mpi_info;
-    double complex, pointer:: a(:), b(:), c(:);
-    external:: fa, fb, null_dcp;
+    double precision, pointer:: a(:), b(:), c(:);
+    integer, pointer:: a_task(:)
+    external:: fa, fb, null_dbl;
     integer:: i, n_work, hq1, hq2, ha1, ha2
     integer:: n_data;
 
@@ -21,25 +22,37 @@ subroutine console_master( mpi_info )
 
     ! send
     call mmff_reset( n_data, 1, hq1 );
-    call mmff_create_data_dcp( a, fa, 's1', ha1 );
+    call mmff_get_task( hq1, a_task );
+    a_task(1) = 50;
+    a_task(9) = 50;
+    a_task(2:8) = 0;
+    call mmff_set_task( hq1, a_task );
+    call mmff_create_data_dbl( a, fa, 's1', ha1 );
     call mmff_send_data( hq1 );
-    call mmff_delete_data_dcp( a, ha1 );
+
 
     n_data = 100;
     ! receive
     call mmff_reset( n_data, 0, hq2 );
-    call mmff_create_data_dcp( c, null_dcp, 'r1', ha2);
+    call mmff_get_task( hq2, a_task );
+    a_task(1) = 50;
+    a_task(9) = 50;
+    a_task(2:8) = 0;
+    call mmff_set_task( hq2, a_task );
+    call mmff_create_data_dbl( c, null_dbl, 'r1', ha2);
     call mmff_recv_data( hq2 );
 
     open(101, file='test.dat')
     do i = 1, 100
-        write(101, '(2(f15.8, 2x))'), c(i);
+        write(101, '((f15.8, 2x))'), c(i);
     end do
     close(101)
 
 
     !   call analyze_result(a)
-    call mmff_delete_data_dcp( c, ha2 );
+
+    call mmff_delete_data_dbl( a, ha1 );
+    call mmff_delete_data_dbl( c, ha2 );
     
     call mmff_final();
 
@@ -55,9 +68,9 @@ end subroutine console_master
 subroutine fa( x, y )
     implicit none;
     integer:: x
-    double complex:: y
+    double precision:: y
 
-    y = (dcmplx(1d0*x, 0d0));
+    y = 1d0*x;
 
     return;
 end subroutine fa
@@ -68,9 +81,9 @@ end subroutine fa
 subroutine fb( x, y )
     implicit none;
     integer:: x
-    double complex:: y
+    double precision:: y
 
-    y = (dcmplx(1d0*x, 0d0))**3d0
+    y = x**3;
 
     return;
 end subroutine fb
@@ -78,12 +91,12 @@ end subroutine fb
 
 
 
-subroutine null_dcp( x, y )
+subroutine null_dbl( x, y )
     implicit none;
     integer, intent(in):: x
-    double complex:: y
+    double precision:: y
 
-    y = (0d0, 0d0);
+    y = 0d0
 
     return;
-end subroutine null_dcp
+end subroutine null_dbl

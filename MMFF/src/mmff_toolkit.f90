@@ -60,12 +60,9 @@ subroutine mmff_reset( n_data, b_verbose, h_queu )
     queu_info(queu_count) % b_arry = 0;
     if( i_rank == 0 ) then
         queu_info(queu_count) % n_data = n_data;
-        queu_info(queu_count) % n_proc = &
-              count( queu_info(queu_count) % a_task > 0 );
     else
         queu_info(queu_count) % n_data = &
               queu_info(queu_count) % a_task(i_rank);
-        queu_info(queu_count) % n_proc = 1;
     end if
     
     n_data = queu_info(queu_count) % n_data;
@@ -351,3 +348,45 @@ subroutine mmff_delete_data_int( a, h_arry )
     return;
 
 end subroutine mmff_delete_data_int
+
+
+
+
+subroutine mmff_get_task( h_queu, a_task )
+    use mod_mmff_core_para, only: n_resc, queu_info
+
+    implicit none;
+    integer, intent(in):: h_queu
+    integer, pointer:: a_task(:)
+    integer:: i
+
+    allocate( a_task( n_resc ) );
+    forall(i=1:n_resc) a_task(i) = queu_info(h_queu) % a_task(i);
+
+    return;
+end subroutine mmff_get_task
+
+
+
+subroutine mmff_set_task( h_queu, a_task )
+    use mod_mmff_core_para, only: queu_count, arry_count, i_rank, n_resc, queu_info;
+
+    implicit none;
+    integer, intent(in):: h_queu
+    integer, pointer:: a_task(:)
+    integer:: i;
+
+    if( sum( a_task ) == sum( queu_info(h_queu) % a_task ) ) then
+        forall(i=1:n_resc) queu_info(h_queu) % a_task(i) = a_task(i);
+    else
+        stop 'invalid assign in mmff_set_task'
+    end if
+
+    if( i_rank > 0 ) then
+        queu_info(h_queu) % n_data = queu_info(h_queu) % a_task(i_rank);
+    end if
+
+    deallocate( a_task );
+
+    return;
+end subroutine mmff_set_task

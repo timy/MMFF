@@ -50,7 +50,6 @@ module mod_mmff_core_para
         integer:: n_data;                                  ! the array size of the this queue
         integer:: i_arry;                                  ! the id of the first array in this queue
         integer:: b_arry;                                  ! if this queue contains the data array
-        integer:: n_proc;                                  ! number of processes in use
         integer, allocatable:: a_task(:);                  ! number of workload for each process
     end type T_queu_info
 

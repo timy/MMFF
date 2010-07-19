@@ -12,6 +12,31 @@ end subroutine mmff_reset
 
 
 
+subroutine mmff_get_task( h_queu, a_task )
+    integer, intent(in):: h_queu
+    integer, pointer:: a_task(:)
+end subroutine mmff_get_task
+
+
+
+subroutine mmff_set_task( h_queu, a_task )
+    integer, intent(in):: h_queu
+    integer, pointer:: a_task(:)
+end subroutine mmff_set_task
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 subroutine mmff_send_data( h_queu )
     integer, intent(in):: h_queu;

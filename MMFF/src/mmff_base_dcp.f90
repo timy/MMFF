@@ -14,9 +14,10 @@ subroutine send_data_mpi_dcp( i_proc, n_elem, send_data, tag, b_verbose )
           i_proc, tag, MPI_COMM_WORLD, mpi_ierr );
 
     if( b_verbose ) then
+        
         if ( mpi_ierr == MPI_SUCCESS ) then
 
-            write( text, '(a, i8, a, i8)' ), 'data ', tag, ' is sent to node ', i_proc; 
+            write( text, '(3(a,i6))' ), 'complex data', tag, ' -> node', i_proc, ' : size =', n_elem; 
             call write_log( text );
 
         else 
@@ -24,7 +25,9 @@ subroutine send_data_mpi_dcp( i_proc, n_elem, send_data, tag, b_verbose )
                   'error from data ', tag, ' in process ', i_proc, &
                   ': ', mpi_ierr;
             call write_log( text );
+            
         end if
+        
     end if
 
     return;
@@ -49,17 +52,21 @@ subroutine recv_data_mpi_dcp( i_proc, n_elem, recv_data, tag, b_verbose )
           tag, MPI_COMM_WORLD, status, mpi_ierr );
 
     if( b_verbose ) then
+        
         if ( mpi_ierr == MPI_SUCCESS ) then
 
-            write( text, '(a, i8, a, i8)' ), 'data ', tag, &
-                  ' is received from node ', i_proc; 
+            write( text, '(3(a,i6))' ), 'complex data', tag, ' <- node', i_proc, ' : size =', n_elem;  
             call write_log( text );
+            
         else
+            
             write( text, '(a, i8, a, i8, a, i8)'), &
                   'error from data ', tag, ' in process ', i_proc, &
                   ': ', mpi_ierr;
             call write_log( text );
+            
         end if
+        
     end if
     return;
 

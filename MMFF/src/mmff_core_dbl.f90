@@ -5,8 +5,9 @@ subroutine manage_and_send_data_dbl( i_arry )
 
     implicit none;
     integer, intent(in):: i_arry
-    integer:: i_queu, n_proc, i_proc, tag
+    integer:: i_queu, i_proc, tag
     double precision, pointer:: send_data(:)
+    character(len=200):: text
 
     interface
 
@@ -33,12 +34,16 @@ subroutine manage_and_send_data_dbl( i_arry )
     i_queu = arry_info(i_arry) % queu;
 
     if ( i_rank == 0 ) then
-
-        n_proc = queu_info(i_queu) % n_proc;
+        
+        call write_log( repeat('-', 56) );
+        write( text, '(2(a,i6))' ), 'sending queue:', i_queu, '    array:', i_arry; 
+        call write_log( text );
 
         ! for a given data array, loop processes in use
-        do i_proc = 1, n_proc
-
+        do i_proc = 1, n_resc
+            
+            if( queu_info(i_queu) % a_task(i_proc) == 0 ) cycle;
+            
             call generate_tag( arry_info(i_arry) % id, i_proc, tag );
 
             call create_mpi_data_dbl( n_resc, i_proc, queu_info(i_queu) % a_task, send_data );
@@ -81,8 +86,9 @@ subroutine manage_and_recv_data_dbl( i_arry )
 
     implicit none;
     integer, intent(in):: i_arry
-    integer:: i_proc, n_proc, i_queu, tag
+    integer:: i_proc, i_queu, tag
     double precision, pointer:: recv_data(:);
+    character(len=200):: text
 
     interface
 
@@ -109,10 +115,14 @@ subroutine manage_and_recv_data_dbl( i_arry )
 
     if( i_rank == 0 ) then
 
-        n_proc = queu_info(i_queu) % n_proc;
+        call write_log( repeat('-', 56) );
+        write( text, '(2(a,i6))' ), 'recving queue:', i_queu, '    array:', i_arry; 
+        call write_log( text );
 
         ! for a given data array, loop processes in use
-        do i_proc = 1, n_proc
+        do i_proc = 1, n_resc
+
+            if( queu_info(i_queu) % a_task(i_proc) == 0 ) cycle;
 
             call generate_tag( arry_info(i_arry) % id, i_proc, tag );
 
