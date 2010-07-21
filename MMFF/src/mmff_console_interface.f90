@@ -25,10 +25,14 @@ subroutine mmff_set_task( h_queu, a_task )
 end subroutine mmff_set_task
 
 
+subroutine mmff_broadcast_master_int( na, a )
+    integer, intent(in):: na, a(na)
+end subroutine mmff_broadcast_master_int
 
 
-
-
+subroutine mmff_broadcast_slave_int( a )
+    integer, pointer:: a(:)
+end subroutine mmff_broadcast_slave_int
 
 
 

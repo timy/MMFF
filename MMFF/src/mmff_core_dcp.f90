@@ -36,7 +36,9 @@ subroutine manage_and_send_data_dcp( i_arry )
     if ( i_rank == 0 ) then
 
         call write_log( repeat('-', 56) );
-        write( text, '(2(a,i6))' ), 'sending queue:', i_queu, '    array:', i_arry; 
+        write( text, '(2(a,i6), a)' ), &
+              'sending queue', i_queu, '    array', i_arry, &
+              '     (' // trim(arry_info(i_arry)%name) // ')';  
         call write_log( text );
 
         ! for a given data array, loop processes in use
@@ -116,7 +118,9 @@ subroutine manage_and_recv_data_dcp( i_arry )
     if( i_rank == 0 ) then
 
         call write_log( repeat('-', 56) );
-        write( text, '(2(a,i6))' ), 'recving queue:', i_queu, '    array:', i_arry; 
+        write( text, '(2(a,i6), a)' ), &
+              'recving queue', i_queu, '    array', i_arry, &
+              '     (' // trim(arry_info(i_arry)%name) // ')';  
         call write_log( text );
 
         ! for a given data array, loop processes in use

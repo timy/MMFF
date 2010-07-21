@@ -2,10 +2,10 @@ include ../Makefile.cfg
 
 OUT = ../test
 SRC_CONSOLE	= \
-	console_master.f90 \
-	console_slave.f90
+	console_master_1.f90 \
+	console_slave_1.f90
 
-FORTRAN_FLAGS	:= $(FORTRAN_FLAGS)
+FORTRAN_FLAGS	:= $(FORTRAN_FLAGS) -fpp
 INCLUDE		:= $(INCLUDE) -I../src  # used to include the annoying module 'mmff_mpi_info'
 LIBS		:= $(LIBS) -L.. -lmmff
 MMFF_DIR	:= ./.

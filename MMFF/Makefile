@@ -2,7 +2,7 @@ include ./Makefile.cfg
 
 SUBDIRS = src $(MAIN_DIR)
 
-all: $(SUBDIRS)
+all: clean $(SUBDIRS)
 	for subdir in $(SUBDIRS); do (cd $${subdir}; $(MAKE) $@); done 
 
 run:

@@ -390,3 +390,134 @@ subroutine mmff_set_task( h_queu, a_task )
 
     return;
 end subroutine mmff_set_task
+
+
+
+
+subroutine mmff_broadcast_master_int( na, a )
+    use mod_mmff_core_para, only: n_resc
+
+    implicit none
+    integer, intent(in):: na, a(na)
+    integer:: first, last, n_data, i_proc
+    integer:: h_q1, h_q2, h_a1, h_a2
+    integer, external:: null_int
+    integer, pointer:: data_size(:), data(:)
+    
+    interface
+        subroutine mmff_create_data_int( a, f, str, h_arry )
+            integer, pointer:: a(:)
+            external:: f;
+            character(len=*):: str;
+            integer, intent(in):: h_arry;
+        end subroutine mmff_create_data_int
+
+        subroutine mmff_delete_data_int( a, h_arry )
+            integer, pointer:: a(:)
+            integer, intent(in):: h_arry
+        end subroutine mmff_delete_data_int
+    end interface
+
+
+    ! first, send size of array to each proc
+    n_data = n_resc;
+    call mmff_reset( n_data, 0, h_q1 );
+    call mmff_create_data_int( data_size, null_int, 'broadcast_size', h_a1 );
+    forall(i_proc=1:n_resc) data_size(i_proc) = na;
+    call mmff_send_data( h_q1 );
+    call mmff_delete_data_int( data_size, h_a1 );
+
+    !second, send the actual data array to each proc
+    n_data = n_resc * na;
+    call mmff_reset( n_data, 0, h_q2 );
+    call mmff_create_data_int( data, null_int, 'broadcast_data', h_a2 );
+    do i_proc = 1, n_resc
+        first = (i_proc - 1) * na + 1;
+        last = first + na - 1;
+        data(first:last) = a(1:na);
+    end do
+    call mmff_send_data( h_q2 );
+    call mmff_delete_data_int( data, h_a2 );
+
+    return;
+end subroutine mmff_broadcast_master_int
+
+
+
+
+
+subroutine mmff_broadcast_slave_int( a )
+    use mod_mmff_core_para, only: n_resc
+
+    implicit none
+    integer:: n_data, na, i
+    integer:: h_q1, h_q2, h_a1, h_a2
+    integer, external:: null_int
+    integer, pointer:: data_size(:), data(:), a(:)
+    
+    interface
+        subroutine mmff_create_data_int( a, f, str, h_arry )
+            integer, pointer:: a(:)
+            external:: f;
+            character(len=*):: str;
+            integer, intent(in):: h_arry;
+        end subroutine mmff_create_data_int
+
+        subroutine mmff_delete_data_int( a, h_arry )
+            integer, pointer:: a(:)
+            integer, intent(in):: h_arry
+        end subroutine mmff_delete_data_int
+    end interface
+
+    ! first, recv size of array in each proc
+    n_data = n_resc;
+    call mmff_reset( n_data, 0, h_q1 );
+    call mmff_create_data_int( data_size, null_int, 'braodcast_size', h_a1 );
+    call mmff_recv_data( h_q1 );
+    na = data_size(1);
+    allocate( a(na) );
+    call mmff_delete_data_int( data_size, h_a1 );
+
+    ! second, recv the actual data array to each proc
+    n_data = na * n_resc;
+    call mmff_reset( n_data, 0, h_q2 );
+    call mmff_create_data_int( data, null_int, 'broadcast_data', h_a2 );
+    call mmff_recv_data( h_q2 );
+    forall(i=1:n_data) a(i) = data(i);
+    call mmff_delete_data_int( data, h_a2 );
+
+    return;
+end subroutine mmff_broadcast_slave_int
+
+
+
+
+subroutine null_dbl( x, y )
+    implicit none;
+    integer, intent(in):: x
+    double precision:: y
+
+    y = 0d0;
+
+    return;
+end subroutine null_dbl
+
+subroutine null_dcp( x, y )
+    implicit none;
+    integer, intent(in):: x
+    double complex:: y
+
+    y = (0d0, 0d0);
+
+    return;
+end subroutine null_dcp
+
+subroutine null_int( x, y )
+    implicit none;
+    integer, intent(in):: x
+    integer:: y
+
+    y = 0;
+
+    return;
+end subroutine null_int

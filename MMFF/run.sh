@@ -6,7 +6,7 @@
 # Use current working directory
 #$ -cwd
 #
-# pe request 10 slots
+# pe request 4 slots
 #$ -pe mvapich2 10
 #
 #$ -v MPI_HOME=/usr/local/Packages/mvapich2
