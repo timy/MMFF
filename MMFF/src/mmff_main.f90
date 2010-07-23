@@ -7,6 +7,7 @@ program main
 
     type(T_mmff_mpi_info):: mpi_info;
     integer:: mpi_ierr;
+    integer:: time_start(6)
 
     call MPI_init( mpi_ierr );
     call MPI_comm_rank( MPI_COMM_WORLD, mpi_info % i_rank, mpi_ierr );
@@ -15,7 +16,9 @@ program main
 
     if ( mpi_info % i_rank == 0 ) then
     
+        call timer_tic_with_log( time_start );
         call console_master( mpi_info );
+        call timer_toc_with_log( time_start );
 
     else if ( mpi_info % i_rank > 0 ) then
 

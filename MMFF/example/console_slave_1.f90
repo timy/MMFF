@@ -9,7 +9,7 @@ subroutine console_slave( mpi_info )
     double complex, pointer:: w_im_(:), w_re_(:)
     integer, pointer:: n_ts_in_p0_(:), n_ts_in_proc(:)
     integer, pointer:: a_task(:), n_ts(:)
-    integer, allocatable:: px_0(:), pz_0(:)
+    double precision, allocatable:: px_0(:), pz_0(:)
     external:: null_dbl, null_int, null_dcp
     integer:: i, i_proc, i_p0, count
     integer:: h_q1, h_q2, h_q3
